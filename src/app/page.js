@@ -1,12 +1,12 @@
 import Footer from "@/components/footer/Footer";
 import Navbar from "@/components/nav/Navbar";
-import BannerCarousel from "@/components/home/banner/BannerCarousel";
+import Banner from "@/components/home/banner/Banner";
 
 export default function Home() {
   return (
     <div>
       <Navbar></Navbar>
-      <BannerCarousel></BannerCarousel>
+      <Banner></Banner>
       <Footer></Footer>
     </div>
   );

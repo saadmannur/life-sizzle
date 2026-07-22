@@ -1,10 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { FaArrowRight, FaHeart } from "react-icons/fa6";
 import { HiMiniBolt } from "react-icons/hi2";
-
-// TODO: replace with your own photo in /assets — keeping the BannerCarousel pattern
-import heroModel from "@/assets/hero-1.png";
+import BannerCarousel from "./BannerCarousel";
 
 const Banner = () => {
     return (
@@ -55,20 +52,16 @@ const Banner = () => {
                     </div>
                 </div>
 
-                {/* Right: image + floating badges */}
+                {/* Right: carousel + floating badges */}
                 <div className="relative mx-auto w-full max-w-md lg:max-w-lg">
-                    {/* Blob shape behind the photo */}
+                    {/* Blob glow behind the frame */}
                     <div className="absolute inset-6 -z-10 rounded-[46%_54%_58%_42%/48%_45%_55%_52%] bg-[#E2636B]/25 blur-2xl" />
 
-                    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[46%_54%_58%_42%/48%_45%_55%_52%]">
-                        <Image
-                            src={heroModel}
-                            alt="LifeSizzle community member"
-                            fill
-                            priority
-                            sizes="(min-width: 1024px) 480px, 90vw"
-                            className="object-cover"
-                        />
+                    {/* aspect-[4/5] keeps the frame's proportions consistent from mobile to desktop;
+              BannerCarousel is told to fill this box (className="h-full") instead of
+              using its own standalone fixed heights. */}
+                    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2.5rem] shadow-xl">
+                        <BannerCarousel className="h-full" slideHeightClassName="h-full" />
                     </div>
 
                     {/* Floating badge: top-left */}
