@@ -6,7 +6,7 @@ import NavColor from "./NavColor";
 const Navbar = () => {
     return (
         <NavColor>
-            <nav className="container mx-auto px-5 py-5">
+            <nav className="container mx-auto px-5 py-5  border-b border-gray-300">
                 <div className="flex items-center justify-between">
                     {/* Brand */}
                     <Link href="/" className="flex items-center gap-2">
