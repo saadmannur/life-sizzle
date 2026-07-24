@@ -40,7 +40,7 @@ const NavSession = ({ variant = "desktop" }) => {
     }
 
     // Add Lesson / My Lessons only for logged-in users, Pricing only while on the Free plan
-    const protectedLinks = user
+    const protectedLinks = user?.role === 'user'
         ? [
             { href: "/dashboard/user/new", label: "Add Lesson" },
             { href: "/dashboard/my-lessons", label: "My Lessons" },
