@@ -7,6 +7,7 @@ import { Person, LayoutHeaderCells, ArrowRightFromSquare, Persons } from "@gravi
 import { HiChevronDown } from "react-icons/hi2";
 import NavLinks from "./NavLinks";
 import { authClient } from "@/lib/auth-client";
+import { IoDiamond } from "react-icons/io5";
 
 
 const NavSession = ({ variant = "desktop" }) => {
@@ -31,8 +32,6 @@ const NavSession = ({ variant = "desktop" }) => {
 
     // Central handler for the dropdown — routes on profile/dashboard, signs out on logout.
     const handleMenuAction = (key) => {
-        if (key === "profile") router.push("/dashboard/profile");
-        if (key === "dashboard") router.push("/dashboard");
         if (key === "logout") handleSignOut();
     };
 
@@ -43,11 +42,17 @@ const NavSession = ({ variant = "desktop" }) => {
     // Add Lesson / My Lessons only for logged-in users, Pricing only while on the Free plan
     const protectedLinks = user
         ? [
-            { href: "/dashboard/add-lesson", label: "Add Lesson" },
+            { href: "/dashboard/user/new", label: "Add Lesson" },
             { href: "/dashboard/my-lessons", label: "My Lessons" },
             ...(!isPremium ? [{ href: "/pricing", label: "Pricing" }] : []),
         ]
         : [];
+
+    const dashboardLinks = {
+        user: '/dashboard/user',
+        admin: '/dashboard/admin'
+    }
+
 
     if (variant === "mobile") {
         return (
@@ -117,8 +122,9 @@ const NavSession = ({ variant = "desktop" }) => {
 
             {user && pathname !== "/login" ? (
                 <div className="flex items-center gap-3">
-                    {isPremium  && (
-                        <span className="rounded-full bg-[#E2636B]/10 px-3 py-1 text-xs font-semibold uppercase text-[#E2636B]">
+                    {isPremium && (
+                        <span className="rounded-full bg-[#E2636B]/10 px-3 py-1 text-xs font-semibold uppercase text-[#E2636B] flex items-center gap-1">
+                            <IoDiamond />
                             Premium
                         </span>
                     )}
@@ -163,7 +169,7 @@ const NavSession = ({ variant = "desktop" }) => {
                                         <span className="block truncate text-xs text-[#8A93A0]">{user?.email}</span>
                                     </div>
                                 </Dropdown.Item>
-                            
+
                                 <Dropdown.Item
                                     id="profile"
                                     textValue="Profile"
@@ -177,6 +183,7 @@ const NavSession = ({ variant = "desktop" }) => {
 
                                 <Dropdown.Item
                                     id="dashboard"
+                                    href={dashboardLinks[user?.role || "user"]}
                                     textValue="Dashboard"
                                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#26313B] transition-colors hover:bg-[#FBF6EC]"
                                 >
@@ -185,6 +192,7 @@ const NavSession = ({ variant = "desktop" }) => {
                                     </span>
                                     <Label>Dashboard</Label>
                                 </Dropdown.Item>
+
 
                                 <Dropdown.Item
                                     id="logout"
