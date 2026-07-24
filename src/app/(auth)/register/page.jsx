@@ -1,45 +1,46 @@
 'use client'
-// import { authClient } from '@/lib/auth-client';
-import { Button, Separator, toast } from '@heroui/react';
+
+import { authClient } from '@/lib/auth-client';
+import { Button, Separator } from '@heroui/react';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-// import { toast } from 'react-toastify';
+import { FiLoader, FiUserPlus } from 'react-icons/fi';
+import { toast } from 'sonner';
 
 const RegisterPage = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, watch, formState: { errors } } = useForm()
     const validateConfirmPassword = watch('password')
 
     const handleLoginFunc = async (data) => {
-        console.log(data)
+        setIsSubmitting(true);
+        // console.log(data)
         const { name, email, photo, password, confirmPassword } = data;
 
-        // const { data: res, error } = await authClient.signUp.email({
-        //     name: name,
-        //     email: email,
-        //     image: photo,
-        //     password: password,
-        //     confirmPassword: confirmPassword,
-        //     callbackURL: "/"
-        // })
-        // // console.log('signup response', {res, error});
+        const { data: res, error } = await authClient.signUp.email({
+            name: name,
+            email: email,
+            image: photo,
+            password: password,
+            confirmPassword: confirmPassword,
+        })
+        // console.log('signup response', {res, error});
 
-        // if (error) {
-        //     toast.error(error.message, {
-        //         position: 'top-center',
-        //     })
-        // }
+        if (error) {
+            toast.error(error.message)
+            setIsSubmitting(false);
+            return
+        }
 
-        // if (res) {
-        //     toast.success("Sign Up Successful", {
-        //         position: 'top-center',
-        //     })
-        //     redirect('/')
-        // }
+        if (res) {
+            toast.success("Sign Up Successful")
+            redirect('/')
+        }
 
     }
 
@@ -165,7 +166,19 @@ const RegisterPage = () => {
                             <p className='text-red-500 text-xs mt-1'>{errors.confirmPassword?.message}</p>
 
 
-                            <Button type='submit' className='rounded-full bg-[#E2636B] text-white font-semibold w-full mt-5 py-2.5 shadow-lg shadow-[#E2636B]/30 hover:opacity-90 transition-opacity'>Sign up</Button>
+                            <Button type="submit" isDisabled={isSubmitting} className='rounded-full bg-[#E2636B] text-white font-semibold w-full mt-5 py-2.5 shadow-lg shadow-[#E2636B]/30 hover:opacity-90 transition-opacity'>
+                                {isSubmitting ? (
+                                    <>
+                                        <FiLoader className="h-4 w-4 animate-spin" />
+                                        Creating account...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiUserPlus className="h-4 w-4" />
+                                        Sign up
+                                    </>
+                                )}
+                            </Button>
                         </fieldset>
                     </form>
                     <div className='flex justify-center items-center gap-3 overflow-hidden my-4'>

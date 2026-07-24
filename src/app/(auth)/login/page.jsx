@@ -1,43 +1,45 @@
 'use client'
-// import { authClient } from '@/lib/auth-client';
-import { Button, Separator, toast } from '@heroui/react';
+
+import { authClient } from '@/lib/auth-client';
+import { Button, Separator,} from '@heroui/react';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-// import { toast } from 'react-toastify';
+import { FiLoader, FiLogIn } from 'react-icons/fi';
+import { toast } from 'sonner';
 
 
 const LoginPage = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm()
 
     const handleLoginFunc = async (data) => {
-        console.log(data)
+        setIsSubmitting(true);
+        // console.log(data)
         const { email, password } = data;
 
-        // const { data: res, error } = await authClient.signIn.email({
-        //     email: email,
-        //     password: password,
-        //     rememberMe: true,
-        //     callbackURL: "/",
-        // })
+        const { data: res, error } = await authClient.signIn.email({
+            email: email,
+            password: password,
+            rememberMe: true,
+            callbackURL: "/",
+        })
         // console.log('login response', {res, error})
 
-        // if (error) {
-        //     toast.error(error.message, {
-        //         position: 'top-center',
-        //     })
-        // }
+        if (error) {
+            toast.error(error.message)
+            setIsSubmitting(false);
+            return
+        }
 
-        // if (res) {
-        //     toast.success("Login Successful", {
-        //         position: 'top-center',
-        //     })
-        //     redirect('/')
-        // }
+        if (res) {
+            toast.success("Login Successful")
+            redirect('/')
+        }
     }
 
     const handleGoogleSignIn = async () => {
@@ -107,7 +109,19 @@ const LoginPage = () => {
                             </div>
                             <p className='text-red-500 text-xs mt-1'>{errors.password?.message}</p>
 
-                            <Button type='submit' className='rounded-full bg-[#E2636B] text-white font-semibold w-full mt-5 py-2.5 shadow-lg shadow-[#E2636B]/30 hover:opacity-90 transition-opacity'>Login</Button>
+                            <Button type="submit" isDisabled={isSubmitting} className='rounded-full bg-[#E2636B] text-white font-semibold w-full mt-5 py-2.5 shadow-lg shadow-[#E2636B]/30 hover:opacity-90 transition-opacity'>
+                                {isSubmitting ? (
+                                    <>
+                                        <FiLoader className="h-4 w-4 animate-spin" />
+                                        Logging in...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiLogIn className="h-4 w-4" />
+                                        Log in
+                                    </>
+                                )}
+                            </Button>
                         </fieldset>
                     </form>
                     <div className='flex justify-center items-center gap-3 overflow-hidden my-4'>

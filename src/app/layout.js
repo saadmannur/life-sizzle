@@ -3,6 +3,7 @@ dns.setServers(["8.8.8.8", "8.8.4.4"])
 
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -31,7 +32,10 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col bg-[#FFFFFF]">
 
-        {children}
+        <main>
+          {children}
+          <Toaster position="top-right" richColors expand={false}/>
+        </main>
 
       </body>
     </html>
