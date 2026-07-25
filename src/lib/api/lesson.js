@@ -10,6 +10,7 @@ export const getLessons = async (filters = {}) => {
     if (filters.category) params.set('category', filters.category);
     if (filters.search) params.set('search', filters.search);
     if (filters.page) params.set('page', filters.page);
+    if (filters.userId) params.set('userId', filters.userId);
 
     const res = await fetch(`${baseurl}/api/lessons?${params.toString()}`, {
         cache: 'no-store',
@@ -31,7 +32,20 @@ export const getLessonsByUserId = async (userId) => {
     return res.json();
 }
 
+
 export const getLessonsByCategory = async (category) => {
     const res = await fetch(`${baseurl}/api/lessons?category=${category}`);
     return res.json();
 }
+
+// export const getAuthorLessons = async (filters = {}) => {
+//     const params = new URLSearchParams();
+
+//     if (filters.userId) params.set('userId', filters.userId);
+//     if (filters.page) params.set('page', filters.page);
+
+//     const res = await fetch(`${baseurl}/api/lessons?${params.toString()}`, {
+//         cache: 'no-store',
+//     });
+//     return res.json();
+// }

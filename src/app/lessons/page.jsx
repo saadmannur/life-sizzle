@@ -16,7 +16,7 @@ const BrowseLessonsPage = async ({ searchParams }) => {
         search: params?.search,
         page: currentPage,
     })
-    console.log(lessons);
+    // console.log(lessons);
 
     return (
         <div className="min-h-screen bg-[#FBF6EC]">
