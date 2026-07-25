@@ -71,7 +71,8 @@ const NavSession = ({ variant = "desktop" }) => {
                             <p className="truncate text-xs text-[#8A93A0]">{user?.email}</p>
                         </div>
                         {isPremium && (
-                            <span className="ml-auto shrink-0 rounded-full bg-[#E2636B]/10 px-2.5 py-1 text-[10px] font-semibold uppercase text-[#E2636B]">
+                            <span className="ml-auto shrink-0 rounded-full bg-[#E2636B]/10 px-2.5 py-1 text-[10px] font-semibold uppercase text-[#E2636B] flex items-center gap-1">
+                                <IoDiamond />
                                 Premium
                             </span>
                         )}

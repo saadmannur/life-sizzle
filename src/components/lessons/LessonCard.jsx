@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PiLockKeyBold, PiBookOpenTextBold } from "react-icons/pi";
 import { getUserSession } from "@/lib/core/session";
+import { IoDiamond } from "react-icons/io5";
 
 const formatDate = (value) => {
     const raw = value?.$date || value;
@@ -55,11 +56,13 @@ const LessonCard = async ({ lesson }) => {
                     </span>
                     <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase ${lesson?.accessLevel === "premium"
-                                ? "bg-[#6366F1]/10 text-[#6366F1]"
+                            ? "bg-[#6366F1]/10 text-[#6366F1] flex items-center gap-1"
                                 : "bg-[#26313B]/8 text-[#26313B]/70"
                             }`}
                     >
-                        {lesson?.accessLevel}
+                        {
+                            lesson?.accessLevel === "premium" ? <><IoDiamond />{lesson?.accessLevel}</> : <>{lesson?.accessLevel}</>
+                        }
                     </span>
                 </div>
 
@@ -102,8 +105,9 @@ const LessonCard = async ({ lesson }) => {
                     </p>
                     <Link
                         href="/pricing"
-                        className="rounded-full bg-[#E2636B] px-5 py-2 text-xs font-semibold text-white shadow-lg shadow-[#E2636B]/30 hover:opacity-90"
+                        className="rounded-full bg-[#E2636B] px-5 py-2 text-xs font-semibold text-white shadow-lg shadow-[#E2636B]/30 hover:opacity-90 flex items-center gap-1"
                     >
+                        <IoDiamond />
                         Upgrade to Premium
                     </Link>
                 </div>
