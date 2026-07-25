@@ -1,9 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { PiLockKeyBold, PiBookOpenTextBold } from "react-icons/pi";
-
-// TODO: replace with real premium status from session once Better Auth is wired up
-const isPremiumUser = false;
+import { getUserSession } from "@/lib/core/session";
 
 const formatDate = (value) => {
     const raw = value?.$date || value;
@@ -11,7 +9,13 @@ const formatDate = (value) => {
     return new Date(raw).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 };
 
-const LessonCard = ({ lesson }) => {
+const LessonCard = async ({ lesson }) => {
+
+    // TODO: replace with real premium status from session once Better Auth is wired up
+    const user = await getUserSession()
+    // console.log(user.isPremium);
+    const isPremiumUser = user.isPremium;
+
     const isLocked = lesson?.accessLevel === "premium" && !isPremiumUser;
     const createdDate = formatDate(lesson?.createAt);
 
@@ -80,7 +84,7 @@ const LessonCard = ({ lesson }) => {
                 </div>
 
                 <Link
-                    href={`/public-lessons/${lesson?._id}`}
+                    href={`lessons/${lesson?._id}`}
                     className="mt-auto inline-flex items-center justify-center rounded-full bg-[#26313B] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#E2636B]"
                 >
                     See Details
