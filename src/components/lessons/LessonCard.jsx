@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { PiLockKeyBold, PiBookOpenTextBold } from "react-icons/pi";
+import { PiLockKeyBold, PiBookOpenTextBold, PiUserCircleBold } from "react-icons/pi";
 import { getUserSession } from "@/lib/core/session";
 import { IoDiamond } from "react-icons/io5";
 
@@ -15,9 +15,14 @@ const LessonCard = async ({ lesson }) => {
     // TODO: replace with real premium status from session once Better Auth is wired up
     const user = await getUserSession()
     // console.log(user.isPremium);
-    const isPremiumUser = user.isPremium;
+    const isPremiumUser = user?.isPremium || user?.role === 'admin';
+    const isOwner = user?.id === lesson?.userId || user?.role === 'admin'
 
-    const isLocked = lesson?.accessLevel === "premium" && !isPremiumUser;
+    const isPrivateLocked = lesson?.visibility === "private" && !isOwner;
+    const isPremiumLocked = lesson?.accessLevel === "premium" && !isPremiumUser && !isOwner;
+    // Private takes priority — an unpurchased premium upgrade won't unlock someone else's private lesson.
+    const isLocked = isPrivateLocked || isPremiumLocked;
+
     const createdDate = formatDate(lesson?.createAt);
 
     // TODO: populate creator name/photo from the users collection when joining lesson data —
@@ -48,7 +53,7 @@ const LessonCard = async ({ lesson }) => {
                 </span>
             </div>
 
-            {/* Body — blurred + locked when it's a premium lesson and the viewer isn't premium */}
+            {/* Body — blurred + locked when it's private (non-owner) or premium (non-premium viewer) */}
             <div className={`flex flex-1 flex-col p-5 ${isLocked ? "pointer-events-none select-none blur-sm" : ""}`}>
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-[#E2636B]/10 px-2.5 py-1 text-[11px] font-semibold text-[#E2636B]">
@@ -57,7 +62,7 @@ const LessonCard = async ({ lesson }) => {
                     <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase ${lesson?.accessLevel === "premium"
                             ? "bg-[#6366F1]/10 text-[#6366F1] flex items-center gap-1"
-                                : "bg-[#26313B]/8 text-[#26313B]/70"
+                            : "bg-[#26313B]/8 text-[#26313B]/70"
                             }`}
                     >
                         {
@@ -87,15 +92,25 @@ const LessonCard = async ({ lesson }) => {
                 </div>
 
                 <Link
-                    href={`lessons/${lesson?._id}`}
+                    href={`/lessons/${lesson?._id}`}
                     className="mt-auto inline-flex items-center justify-center rounded-full bg-[#26313B] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#E2636B]"
                 >
                     See Details
                 </Link>
             </div>
 
-            {/* Premium lock overlay */}
-            {isLocked && (
+            {/* Lock overlay — private (owner-only) takes priority over premium */}
+            {isPrivateLocked ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/40">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#26313B] text-white shadow-lg">
+                        <PiUserCircleBold className="h-5 w-5" />
+                    </span>
+                    <p className="max-w-[85%] text-center text-xs font-bold leading-relaxed text-[#26313B]">
+                        Private Lesson
+                        <span className="mt-0.5 block font-medium text-[#6B7684]">Only visible to its creator</span>
+                    </p>
+                </div>
+            ) : isPremiumLocked ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/40">
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#6366F1] text-white shadow-lg">
                         <PiLockKeyBold className="h-5 w-5" />
@@ -111,7 +126,7 @@ const LessonCard = async ({ lesson }) => {
                         Upgrade to Premium
                     </Link>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };
