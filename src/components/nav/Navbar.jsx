@@ -29,7 +29,7 @@ const Navbar = () => {
                         </div>
                         <ul tabIndex={0} className="menu dropdown-content menu-sm z-[100] mt-3 w-64 rounded-box bg-white p-4 shadow-lg">
                             <li><NavLinks href="/">Home</NavLinks></li>
-                            <li><NavLinks href="/public-lessons">Public Lessons</NavLinks></li>
+                            <li><NavLinks href="/lessons">Public Lessons</NavLinks></li>
                             <li className="mt-2 border-t border-black/10 pt-2">
                                 {/* Protected links + auth actions, client-rendered based on session */}
                                 <NavSession variant="mobile" />
@@ -40,7 +40,7 @@ const Navbar = () => {
                     {/* Center nav links — desktop only */}
                     <ul className="hidden items-center gap-8 lg:flex">
                         <li><NavLinks href="/">Home</NavLinks></li>
-                        <li><NavLinks href="/public-lessons">Public Lessons</NavLinks></li>
+                        <li><NavLinks href="/lessons">Public Lessons</NavLinks></li>
                     </ul>
 
                     {/* Right side: protected links + auth actions */}

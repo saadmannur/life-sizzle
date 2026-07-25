@@ -21,7 +21,7 @@ import { authClient } from "@/lib/auth-client";
 const userNavItems = [
     { icon: PiHouseSimpleBold, href: "/dashboard/user", label: "Home" },
     { icon: PiPlusCircleBold, href: "/dashboard/user/new", label: "Add Lessons" },
-    { icon: PiBookOpenTextBold, href: "/dashboard/my-lessons", label: "My Lessons" },
+    { icon: PiBookOpenTextBold, href: "/dashboard/user/my-lessons", label: "My Lessons" },
     { icon: PiHeartBold, href: "/dashboard/my-favorites", label: "My Favorites" },
     { icon: PiUserBold, href: "/dashboard/profile", label: "Profile" },
 ];

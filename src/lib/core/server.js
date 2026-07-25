@@ -30,13 +30,13 @@ export const serverMutation = async (path, data, method = 'POST') => {
         method: method,
         headers: {
             'content-type': 'application/json',
-            // ... await authHeader()
+            ... await authHeader()
         },
         body: JSON.stringify(data)
     });
 
-    // return handleStatusCode(res)
-    return res.json()
+    return handleStatusCode(res)
+    // return res.json()
 }
 
 //handle 401, 403 

@@ -12,6 +12,7 @@ import {
     TextArea,
     FieldError,
 } from "@heroui/react";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 import { FiLoader, FiLogIn } from "react-icons/fi";
 import { HiOutlineCloudArrowUp } from "react-icons/hi2";
@@ -74,10 +75,12 @@ const AddLesson = () => {
                 imageUrl,
                 userId: user?.id,
                 userEmail: user?.email,
+                userName: user?.name,
+                userImage: user?.image,
 
             };
 
-            // console.log(newLessonData);
+            console.log(newLessonData);
 
             // const data = await postLessonData(newLessonData) // inside mongodb check
             // console.log(data);
@@ -95,11 +98,14 @@ const AddLesson = () => {
             // TODO: redirect to /dashboard/recruiter/jobs or show a success toast
             e.target.reset();
 
+            
+
         } catch (err) {
-            toast.error(err.message || "Something went wrong. Please try again.");
+            toast.error("Something went wrong. Please try again.");
         }
          finally {
             setIsSubmitting(false);
+            redirect('/dashboard/user/my-lessons')
         }
     };
 
