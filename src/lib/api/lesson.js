@@ -1,3 +1,4 @@
+import { serverFetch } from "../core/server";
 
 
 const baseurl = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -21,11 +22,16 @@ export const getLessons = async (filters = {}) => {
     return res.json();
 }
 
-export const getJobById = async (jobId) => {
-    return serverFetch(`/api/jobs/${jobId}`)
+export const getLessonById = async (lessonId) => {
+    return serverFetch(`/api/lessons/${lessonId}`)
 }
 
-export const getCompanyJobs = async (companyId, status = 'active') => {
-    const res = await fetch(`${baseurl}/api/jobs?companyId=${companyId}&status=${status}`);
+export const getLessonsByUserId = async (userId) => {
+    const res = await fetch(`${baseurl}/api/lessons?userId=${userId}`);
+    return res.json();
+}
+
+export const getLessonsByCategory = async (category) => {
+    const res = await fetch(`${baseurl}/api/lessons?category=${category}`);
     return res.json();
 }
