@@ -15,7 +15,7 @@ const NavSession = ({ variant = "desktop" }) => {
 
     const { data, isPending } = authClient.useSession();
     const user = data?.user;
-    console.log(user);
+    // console.log(user);
 
     const isPremium = Boolean(user?.isPremium);
 

@@ -1,8 +1,22 @@
 "use client";
 
+import { postLessonData } from "@/api/postData";
+import { createLesson } from "@/lib/actions/lessons";
+import { authClient } from "@/lib/auth-client";
+import { uploadImage } from "@/lib/uploadImage";
+import {
+    Button,
+    TextField,
+    Input,
+    Label,
+    TextArea,
+    FieldError,
+} from "@heroui/react";
 import { useState } from "react";
+import { FiLoader, FiLogIn } from "react-icons/fi";
 import { HiOutlineCloudArrowUp } from "react-icons/hi2";
 import { PiFireBold, PiCloudRainBold, PiHandsPrayingBold, PiSparkleBold } from "react-icons/pi";
+import { toast } from "sonner";
 
 const CATEGORIES = ["Personal Growth", "Career", "Relationships", "Mindset", "Mistakes Learned", "Philosophy"];
 
@@ -13,25 +27,80 @@ const TONES = [
     { label: "Realization", Icon: PiSparkleBold },
 ];
 
-// TODO: replace with real premium status once Better Auth + billing are wired up
-const isPremium = false;
+
 
 const AddLesson = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [category, setCategory] = useState("Personal Growth");
     const [tone, setTone] = useState("Motivational");
     const [visibility, setVisibility] = useState("public");
     const [accessLevel, setAccessLevel] = useState("free");
     const [imagePreview, setImagePreview] = useState(null);
 
+    const { data, isPending } = authClient.useSession();
+    const user = data?.user;
+    // console.log(user);
+
+    const isPremium = Boolean(user?.isPremium);
+
     const handleImageChange = (e) => {
         const file = e.target.files?.[0];
         if (file) setImagePreview(URL.createObjectURL(file));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: wire this up to the lessons API once the backend is ready
-        console.log({ category, tone, visibility, accessLevel });
+
+        setIsSubmitting(true);
+
+        try {
+            const formData = new FormData(e.currentTarget);
+
+            const imageFile = formData.get("image");
+            // console.log(imageFile);
+            
+            let imageUrl = "";
+
+            if (imageFile && imageFile.size > 0) {
+                imageUrl = await uploadImage(imageFile);
+            }
+
+            const newLessonData = {
+                ...Object.fromEntries(formData.entries()),
+                category,
+                tone,
+                visibility,
+                accessLevel,
+                imageUrl,
+                userId: user?.id,
+                userEmail: user?.email,
+
+            };
+
+            // console.log(newLessonData);
+
+            // const data = await postLessonData(newLessonData) // inside mongodb check
+            // console.log(data);
+
+            
+
+            const data = await createLesson(newLessonData)
+            console.log(data);
+
+
+            if (data.acknowledged === true) {
+                toast.success("Add Lesson Successfully");
+            }
+
+            // TODO: redirect to /dashboard/recruiter/jobs or show a success toast
+            e.target.reset();
+
+        } catch (err) {
+            toast.error(err.message || "Something went wrong. Please try again.");
+        }
+         finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -55,27 +124,38 @@ const AddLesson = () => {
 
                 {/* Form fields */}
                 <div className="space-y-8 p-6 sm:p-10">
-                    <div>
-                        <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#8A93A0]">
+                    <TextField
+                        name="headline"
+                        isRequired
+                    >
+                        <Label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#8A93A0]">
                             The Headline
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="What did life teach you?"
-                            className="w-full rounded-xl border border-[#26313B]/10 bg-[#FBF6EC]/60 px-4 py-3 text-[#26313B] placeholder:text-[#8A93A0] focus:border-[#E2636B] focus:outline-none focus:ring-2 focus:ring-[#E2636B]/20"
-                        />
-                    </div>
+                        </Label>
 
-                    <div>
-                        <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#8A93A0]">
+                        <Input
+                            placeholder="What did life teach you?"
+                            className="w-full rounded-xl border border-[#26313B]/10 bg-[#FBF6EC]/60"
+                        />
+
+                        <FieldError />
+                    </TextField>
+
+                    <TextField
+                        name="lesson"
+                        isRequired
+                    >
+                        <Label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#8A93A0]">
                             The Lesson
-                        </label>
-                        <textarea
+                        </Label>
+
+                        <TextArea
                             rows={5}
                             placeholder="Tell the full story..."
-                            className="w-full resize-none rounded-xl border border-[#26313B]/10 bg-[#FBF6EC]/60 px-4 py-3 text-[#26313B] placeholder:text-[#8A93A0] focus:border-[#E2636B] focus:outline-none focus:ring-2 focus:ring-[#E2636B]/20"
+                            className="w-full resize-none rounded-xl border border-[#26313B]/10 bg-[#FBF6EC]/60"
                         />
-                    </div>
+
+                        <FieldError />
+                    </TextField>
 
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                         {/* Category */}
@@ -90,8 +170,8 @@ const AddLesson = () => {
                                         key={c}
                                         onClick={() => setCategory(c)}
                                         className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${category === c
-                                                ? "bg-[#26313B] text-white"
-                                                : "bg-[#FBF6EC] text-[#26313B] hover:bg-[#26313B]/10"
+                                            ? "bg-[#26313B] text-white"
+                                            : "bg-[#FBF6EC] text-[#26313B] hover:bg-[#26313B]/10"
                                             }`}
                                     >
                                         {c}
@@ -112,8 +192,8 @@ const AddLesson = () => {
                                         key={label}
                                         onClick={() => setTone(label)}
                                         className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors ${tone === label
-                                                ? "bg-[#E2636B] text-white"
-                                                : "bg-[#FBF6EC] text-[#26313B] hover:bg-[#E2636B]/10"
+                                            ? "bg-[#E2636B] text-white"
+                                            : "bg-[#FBF6EC] text-[#26313B] hover:bg-[#E2636B]/10"
                                             }`}
                                     >
                                         <Icon className="h-3.5 w-3.5" />
@@ -130,7 +210,7 @@ const AddLesson = () => {
                             Visual Context (optional)
                         </label>
                         <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#26313B]/15 bg-[#FBF6EC]/40 py-10 text-center transition-colors hover:border-[#E2636B]/40">
-                            <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                            <input type="file" name="image" accept="image/*" className="hidden" onChange={handleImageChange} />
                             {imagePreview ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={imagePreview} alt="Preview" className="h-24 rounded-lg object-cover" />
@@ -179,13 +259,50 @@ const AddLesson = () => {
                             )}
                         </div>
                     </div>
+                    <input
+                        type="hidden"
+                        name="category"
+                        value={category}
+                    />
 
-                    <button
-                        type="submit"
-                        className="w-full rounded-full bg-[#E2636B] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#E2636B]/30 transition-opacity hover:opacity-90 sm:w-auto sm:px-10"
-                    >
-                        Publish Lesson
-                    </button>
+                    <input
+                        type="hidden"
+                        name="tone"
+                        value={tone}
+                    />
+
+                    <input
+                        type="hidden"
+                        name="visibility"
+                        value={visibility}
+                    />
+
+                    <input
+                        type="hidden"
+                        name="accessLevel"
+                        value={accessLevel}
+                    />
+                    <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                    />
+
+                    <Button type="submit" isDisabled={isSubmitting} className="w-full rounded-full bg-[#E2636B] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#E2636B]/30 transition-opacity hover:opacity-90 sm:w-auto sm:px-10">
+                        {isSubmitting ? (
+                            <>
+                                <FiLoader className="h-4 w-4 animate-spin" />
+                                Publishing...
+                            </>
+                        ) : (
+                            <>
+                                <FiLogIn className="h-4 w-4" />
+                                Publish Lesson
+                            </>
+                        )}
+                    </Button>
                 </div>
             </form>
         </div>
