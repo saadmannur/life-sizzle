@@ -3,6 +3,7 @@ import Image from "next/image";
 import { PiBookOpenTextBold, PiHeartBold, PiPlusCircleBold, PiSparkleBold, PiArrowRightBold } from "react-icons/pi";
 import { getUserSession } from "@/lib/core/session";
 import { getLessonsByUserId } from "@/lib/api/lesson";
+import { getFavoritesCount } from "@/lib/api/favorites";
 
 // TODO: swap for a real query — count of lessons created per day/week this month
 const mockWeeklyActivity = [
@@ -26,9 +27,11 @@ const UserDashboard = async () => {
 
     // TODO: getLessonsByUserId currently only returns this user's lessons + total count.
     // Favorites count needs its own query, e.g. getFavoritesByUserId(user._id).
-    const { lessons, totalItems } = await getLessonsByUserId(user?._id);
-    const recentLessons = (lessons || []).slice(0, 5);
-    const totalFavorites = 0; // TODO: replace with a real favorites count
+    const { lessons, totalItems } = await getLessonsByUserId(user?.id);
+    const recentLessons = (lessons || []).slice(0, 6);
+
+    const favorites = await getFavoritesCount();
+    const totalFavorites = favorites?.totalItems || 0;
 
     const maxActivity = Math.max(1, ...mockWeeklyActivity.map((d) => d.count));
 
@@ -39,9 +42,9 @@ const UserDashboard = async () => {
     ];
 
     const shortcuts = [
-        { label: "Add a Lesson", href: "/dashboard/add-lesson", icon: PiPlusCircleBold },
-        { label: "My Lessons", href: "/dashboard/my-lessons", icon: PiBookOpenTextBold },
-        { label: "My Favorites", href: "/dashboard/my-favorites", icon: PiHeartBold },
+        { label: "Add a Lesson", href: "/dashboard/user/new", icon: PiPlusCircleBold },
+        { label: "My Lessons", href: "/dashboard/user/my-lessons", icon: PiBookOpenTextBold },
+        { label: "My Favorites", href: "/dashboard/user/my-favorites", icon: PiHeartBold },
     ];
 
     return (
@@ -69,7 +72,7 @@ const UserDashboard = async () => {
                 <div className="rounded-2xl border border-[#26313B]/8 bg-white p-6 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-lg font-bold text-[#26313B]">Recently Added</h2>
-                        <Link href="/dashboard/my-lessons" className="flex items-center gap-1 text-sm font-semibold text-[#E2636B] hover:underline">
+                        <Link href="/dashboard/user/my-lessons" className="flex items-center gap-1 text-sm font-semibold text-[#E2636B] hover:underline">
                             View all <PiArrowRightBold className="h-3.5 w-3.5" />
                         </Link>
                     </div>

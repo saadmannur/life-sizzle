@@ -1,7 +1,8 @@
 "use client";
 
-import { postLessonData } from "@/api/postData";
+// import { postLessonData } from "@/api/postData";
 import { createLesson } from "@/lib/actions/lessons";
+import { updateLesson } from "@/lib/api/updateLesson";
 import { authClient } from "@/lib/auth-client";
 import { uploadImage } from "@/lib/uploadImage";
 import {
@@ -30,13 +31,15 @@ const TONES = [
 
 
 
-const AddLesson = () => {
+const LessonForm = ({ initialData = null, isEdit = false }) => {
+    const [category, setCategory] = useState(initialData?.category || "Personal Growth");
+    const [tone, setTone] = useState(initialData?.tone || "Motivational");
+    const [visibility, setVisibility] = useState(initialData?.visibility || "public");
+    const [accessLevel, setAccessLevel] = useState(initialData?.accessLevel || "free");
+    const [imagePreview, setImagePreview] = useState(initialData?.imageUrl || null);
+    const [headline, setHeadline] = useState(initialData?.headline || "");
+    const [lesson, setLesson] = useState(initialData?.lesson || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [category, setCategory] = useState("Personal Growth");
-    const [tone, setTone] = useState("Motivational");
-    const [visibility, setVisibility] = useState("public");
-    const [accessLevel, setAccessLevel] = useState("free");
-    const [imagePreview, setImagePreview] = useState(null);
 
     const { data, isPending } = authClient.useSession();
     const user = data?.user;
@@ -59,8 +62,8 @@ const AddLesson = () => {
 
             const imageFile = formData.get("image");
             // console.log(imageFile);
-            
-            let imageUrl = "";
+
+            let imageUrl = initialData?.imageUrl || "";
 
             if (imageFile && imageFile.size > 0) {
                 imageUrl = await uploadImage(imageFile);
@@ -85,25 +88,33 @@ const AddLesson = () => {
             // const data = await postLessonData(newLessonData) // inside mongodb check
             // console.log(data);
 
-            
+            let data;
 
-            const data = await createLesson(newLessonData)
-            console.log(data);
-
-
-            if (data.acknowledged === true) {
-                toast.success("Add Lesson Successfully");
+            if (isEdit) {
+                data = await updateLesson(initialData._id, newLessonData);
+            } else {
+                data = await createLesson(newLessonData);
             }
+
+            // const data = await createLesson(newLessonData)
+            // console.log(data);
+
+            if (isEdit) {
+                toast.success("Lesson updated successfully");
+            } else {
+                toast.success("Lesson added successfully");
+            }
+
 
             // TODO: redirect to /dashboard/recruiter/jobs or show a success toast
             e.target.reset();
 
-            
+
 
         } catch (err) {
             toast.error("Something went wrong. Please try again.");
         }
-         finally {
+        finally {
             setIsSubmitting(false);
             redirect('/dashboard/user/my-lessons')
         }
@@ -130,15 +141,14 @@ const AddLesson = () => {
 
                 {/* Form fields */}
                 <div className="space-y-8 p-6 sm:p-10">
-                    <TextField
-                        name="headline"
-                        isRequired
-                    >
+                    <TextField name="headline" isRequired>
                         <Label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#8A93A0]">
                             The Headline
                         </Label>
 
                         <Input
+                            value={headline}
+                            onChange={(e) => setHeadline(e.target.value)}
                             placeholder="What did life teach you?"
                             className="w-full rounded-xl border border-[#26313B]/10 bg-[#FBF6EC]/60"
                         />
@@ -146,15 +156,14 @@ const AddLesson = () => {
                         <FieldError />
                     </TextField>
 
-                    <TextField
-                        name="lesson"
-                        isRequired
-                    >
+                    <TextField name="lesson" isRequired>
                         <Label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#8A93A0]">
                             The Lesson
                         </Label>
 
                         <TextArea
+                            value={lesson}
+                            onChange={(e) => setLesson(e.target.value)}
                             rows={5}
                             placeholder="Tell the full story..."
                             className="w-full resize-none rounded-xl border border-[#26313B]/10 bg-[#FBF6EC]/60"
@@ -300,12 +309,12 @@ const AddLesson = () => {
                         {isSubmitting ? (
                             <>
                                 <FiLoader className="h-4 w-4 animate-spin" />
-                                Publishing...
+                                {isEdit ? "Updating..." : "Publish..."}
                             </>
                         ) : (
                             <>
                                 <FiLogIn className="h-4 w-4" />
-                                Publish Lesson
+                                {isEdit ? "Update Lesson" : "Publish Lesson"}
                             </>
                         )}
                     </Button>
@@ -315,4 +324,4 @@ const AddLesson = () => {
     );
 };
 
-export default AddLesson;
+export default LessonForm;
