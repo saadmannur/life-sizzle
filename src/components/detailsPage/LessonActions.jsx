@@ -1,5 +1,7 @@
 "use client";
 
+import { serverMutation } from "@/lib/core/server";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PiHeart, PiHeartFill, PiBookmarkSimple, PiBookmarkSimpleFill, PiFlagBold, PiShareNetworkBold } from "react-icons/pi";
 
@@ -14,29 +16,87 @@ const LessonActions = ({ lessonId, user, initialLikesCount = 0, initiallyLiked =
     const [reportReason, setReportReason] = useState(REPORT_REASONS[0]);
     const [toast, setToast] = useState(null);
 
+    const router = useRouter()
+
     const showToast = (message) => {
         setToast(message);
         setTimeout(() => setToast(null), 2500);
     };
 
     const requireLogin = () => {
-        showToast("Please log in to continue");
-        // TODO: router.push("/login") once this is wired to real navigation, or trigger your toast lib
-        return !user;
+        if (!user) {
+            showToast("Please log in to continue");
+            return true;
+        }
+
+        return false;
     };
 
-    const handleLike = () => {
+    const handleLike = async () => {
+
         if (requireLogin()) return;
-        // TODO: call the API to add/remove userId from lesson.likes[]
-        setLiked((prev) => !prev);
-        setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
+
+        try {
+
+            const data = await serverMutation(
+                `/api/lessons/${lessonId}/like`,
+                {},
+                "PATCH"
+            );
+            console.log(data);
+
+            setLiked(data.liked);
+
+            setLikesCount(prev =>
+                data.liked
+                    ? prev + 1
+                    : prev - 1
+            );
+
+            if(data.liked){
+                showToast("Liked")
+                router.refresh()
+            }
+            if(data.liked === false){
+                showToast("UnLiked")
+                router.refresh()
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+
         if (requireLogin()) return;
-        // TODO: call the API to add/remove this lesson from the user's favorites
-        setSaved((prev) => !prev);
-        showToast(saved ? "Removed from favorites" : "Saved to favorites");
+
+        try {
+
+            const data = await serverMutation(
+                `/api/lessons/${lessonId}/favorite`,
+                {},
+                "PATCH"
+            );
+
+            setSaved(data.saved);
+
+            showToast(
+                data.saved
+                    ? "Add to favorites"
+                    : "Removed from favorites"
+            );
+            router.refresh()
+
+        } catch (error) {
+
+            console.log(error);
+
+            showToast("Something went wrong");
+
+        }
+
     };
 
     const handleReportSubmit = () => {

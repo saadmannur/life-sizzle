@@ -16,6 +16,7 @@ import CommentSection from "@/components/detailsPage/CommentSection";
 
 import { getLessonById, getLessonsByCategory, getLessonsByUserId } from "@/lib/api/lesson";
 import { getUserSession } from "@/lib/core/session";
+import { protectedFetch } from "@/lib/core/server";
 
 const formatDate = (value) => {
     const raw = value?.$date || value;
@@ -30,9 +31,17 @@ const LessonDetailsPage = async ({ params }) => {
 
     const user = await getUserSession()
 
-    // TODO: these two both hit your API/DB — swap in your real implementations
     const lesson = await getLessonById(lessonId);
     // console.log(lesson)
+
+    let initiallySaved = false;
+    let countFavorite = 0;
+
+    if (user) {
+        const favorite = await protectedFetch(`/api/favorites/check/${lessonId}`);
+        initiallySaved = favorite.saved;
+        countFavorite = favorite.totalItems;
+    }
 
     if (!lesson) {
         return (
@@ -158,7 +167,7 @@ const LessonDetailsPage = async ({ params }) => {
                         {/* Stats */}
                         <div className="mt-6 flex items-center gap-6 text-sm text-[#8A93A0]">
                             <span>❤️ {(lesson?.likes?.length ?? 0).toLocaleString()} Likes</span>
-                            <span>🔖 {(lesson?.favoritesCount ?? 0).toLocaleString()} Favorites</span>
+                            <span>🔖 {(countFavorite ?? 0).toLocaleString()} Favorites</span>
                             <span className="flex items-center gap-1">
                                 <PiEyeBold className="h-4 w-4" /> {views.toLocaleString()} Views
                             </span>
@@ -170,8 +179,8 @@ const LessonDetailsPage = async ({ params }) => {
                                 lessonId={lesson?._id}
                                 user={user}
                                 initialLikesCount={lesson?.likes?.length ?? 0}
-                                initiallyLiked={Boolean(user && lesson?.likes?.includes(user?._id))}
-                                initiallySaved={false}
+                                initiallyLiked={Boolean(user && lesson?.likes?.includes(user?.id.toString()))}
+                                initiallySaved={initiallySaved}
                             />
                         </div>
                     </div>
