@@ -10,7 +10,7 @@ const MyFavoritesPage = async () => {
 
     return (
         <div className="p-4 sm:p-6 lg:p-10">
-            <span className="mb-2 inline-block text-[11px] font-bold uppercase tracking-[0.15em] text-[#E2636B]">
+            <span className="mb-2 inline-block text-[11px] font-bold  uppercase tracking-[0.15em] text-[#E2636B]">
                 Saved For Later
             </span>
             <h1 className="text-2xl font-extrabold text-[#26313B] sm:text-3xl">My Favorites</h1>
