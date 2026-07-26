@@ -15,16 +15,6 @@ const UpdateLessonPage = async ({ params }) => {
     return (
         <LessonForm
             initialData={lesson}
-
-
-
-
-
-
-
-
-
-            
             isEdit={true}
         />
     );
