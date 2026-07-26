@@ -17,6 +17,7 @@ import CommentSection from "@/components/detailsPage/CommentSection";
 import { getLessonById, getLessonsByCategory, getLessonsByUserId } from "@/lib/api/lesson";
 import { getUserSession } from "@/lib/core/session";
 import { protectedFetch } from "@/lib/core/server";
+import { getCommentsByLessonId } from "@/lib/api/comment";
 
 const formatDate = (value) => {
     const raw = value?.$date || value;
@@ -32,7 +33,8 @@ const LessonDetailsPage = async ({ params }) => {
     const user = await getUserSession()
 
     const lesson = await getLessonById(lessonId);
-    // console.log(lesson)
+    const commentsData = await getCommentsByLessonId(lessonId);
+    // console.log(commentsData)
 
     let initiallySaved = false;
     let countFavorite = 0;
@@ -204,7 +206,11 @@ const LessonDetailsPage = async ({ params }) => {
                     {/* Comments — outside the blur so it still gives context, feel free to move inside the lock if you'd rather hide it too */}
                     {!isPremiumLocked && (
                         <div className="mt-10">
-                            <CommentSection user={user} initialComments={lesson?.comments || []} />
+                            <CommentSection
+                                user={user}
+                                lessonId={lessonId}
+                                initialComments={commentsData.comments}
+                            />
                         </div>
                     )}
                 </div>

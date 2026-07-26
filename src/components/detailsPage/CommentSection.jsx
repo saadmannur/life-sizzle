@@ -1,31 +1,51 @@
 "use client";
 
+import { serverMutation } from "@/lib/core/server";
 import { useState } from "react";
 import { PiChatCircleTextBold } from "react-icons/pi";
 
-const CommentSection = ({ user, initialComments = [] }) => {
+const CommentSection = ({ lessonId, user, initialComments = [] }) => {
     const [comments, setComments] = useState(initialComments);
     const [text, setText] = useState("");
 
-    const handlePost = () => {
-        if (!user) {
-            // TODO: route to /login or trigger your toast lib
-            return;
-        }
+    const handlePost = async () => {
+
+        if (!user) return;
+
         if (!text.trim()) return;
 
-        // TODO: POST to the comments collection { lessonId, userId, text, createdAt }
-        setComments((prev) => [
-            {
-                _id: `temp-${Date.now()}`,
-                userName: user?.name || "You",
-                userImage: user?.image,
-                text: text.trim(),
-                createdAt: new Date().toISOString(),
-            },
-            ...prev,
-        ]);
-        setText("");
+        try {
+
+            await serverMutation(
+                "/api/comments",
+                {
+                    lessonId,
+                    text
+                }
+            );
+
+            setComments(prev => [
+                {
+                    _id: Date.now().toString(),
+                    lessonId,
+                    userId: user.id,
+                    userName: user.name,
+                    userImage: user.image,
+                    text: text.trim(),
+                    createdAt: new Date(),
+                    updatedAt: null
+                },
+                ...prev
+            ]);
+
+            setText("");
+
+        } catch (err) {
+
+            console.log(err);
+
+        }
+
     };
 
     return (

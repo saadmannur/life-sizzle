@@ -43,7 +43,7 @@ const NavSession = ({ variant = "desktop" }) => {
     const protectedLinks = user?.role === 'user'
         ? [
             { href: "/dashboard/user/new", label: "Add Lesson" },
-            { href: "/dashboard/my-lessons", label: "My Lessons" },
+            { href: "/dashboard/user/my-lessons", label: "My Lessons" },
             ...(!isPremium ? [{ href: "/pricing", label: "Pricing" }] : []),
         ]
         : [];
