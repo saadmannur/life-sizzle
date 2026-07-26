@@ -18,8 +18,8 @@ const socialLinks = [
 
 const quickLinksLeft = [
     { href: "/about", label: "About us" },
-    { href: "/public-lessons", label: "Public Lessons" },
-    { href: "/dashboard/my-lessons", label: "My Lessons" },
+    { href: "/lessons", label: "Public Lessons" },
+    { href: "/dashboard/user/my-lessons", label: "My Lessons" },
     { href: "/pricing", label: "Pricing" },
     { href: "/contact", label: "Support" },
 ];

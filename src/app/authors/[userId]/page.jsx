@@ -24,7 +24,7 @@ const AuthorLessonsPage = async ({ params, searchParams }) => {
     return (
         <div className="min-h-screen bg-[#FBF6EC]">
             <div className="container mx-auto px-4 pt-8 sm:px-6">
-                <Link href="/public-lessons" className="inline-flex items-center gap-2 text-sm font-semibold text-[#26313B] hover:text-[#E2636B]">
+                <Link href="/lessons" className="inline-flex items-center gap-2 text-sm font-semibold text-[#26313B] hover:text-[#E2636B]">
                     <PiArrowLeftBold className="h-4 w-4" />
                     Back to Public Lessons
                 </Link>

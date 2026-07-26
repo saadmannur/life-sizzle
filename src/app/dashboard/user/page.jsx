@@ -82,7 +82,7 @@ const UserDashboard = async () => {
                             {recentLessons.map((lesson) => (
                                 <Link
                                     key={lesson._id}
-                                    href={`/public-lessons/${lesson._id}`}
+                                    href={`/lessons/${lesson._id}`}
                                     className="flex items-center gap-3 py-3 first:pt-0 last:pb-0 hover:opacity-80"
                                 >
                                     <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-[#FBF6EC]">

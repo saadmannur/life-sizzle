@@ -23,7 +23,7 @@ const userNavItems = [
     { icon: PiPlusCircleBold, href: "/dashboard/user/new", label: "Add Lessons" },
     { icon: PiBookOpenTextBold, href: "/dashboard/user/my-lessons", label: "My Lessons" },
     { icon: PiHeartBold, href: "/dashboard/user/my-favorites", label: "My Favorites" },
-    { icon: PiUserBold, href: "/dashboard/profile", label: "Profile" },
+    { icon: PiUserBold, href: "/dashboard/user/profile", label: "Profile" },
 ];
 
 const adminNavItems = [

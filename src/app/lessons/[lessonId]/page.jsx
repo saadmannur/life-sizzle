@@ -67,7 +67,7 @@ const LessonDetailsPage = async ({ params }) => {
                 </span>
                 <h1 className="text-xl font-bold text-[#26313B]">This lesson is private</h1>
                 <p className="max-w-sm text-sm text-[#8A93A0]">Only its creator can view this lesson right now.</p>
-                <Link href="/public-lessons" className="mt-2 rounded-full bg-[#26313B] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#E2636B]">
+                <Link href="/lessons" className="mt-2 rounded-full bg-[#26313B] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#E2636B]">
                     Back to Public Lessons
                 </Link>
             </div>
@@ -92,7 +92,7 @@ const LessonDetailsPage = async ({ params }) => {
     return (
         <div className="min-h-screen bg-[#FBF6EC] pb-20">
             <div className="container mx-auto px-4 pt-6 sm:px-6">
-                <Link href="/public-lessons" className="inline-flex items-center gap-2 text-sm font-semibold text-[#26313B] hover:text-[#E2636B]">
+                <Link href="/lessons" className="inline-flex items-center gap-2 text-sm font-semibold text-[#26313B] hover:text-[#E2636B]">
                     <PiArrowLeftBold className="h-4 w-4" />
                     Back to Public Lessons
                 </Link>

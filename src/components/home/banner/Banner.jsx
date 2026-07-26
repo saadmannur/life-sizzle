@@ -36,14 +36,14 @@ const Banner = () => {
 
                     <div className="mt-8 flex flex-wrap items-center gap-4">
                         <Link
-                            href="/dashboard/add-lesson"
+                            href="/dashboard/user/new"
                             className="inline-flex items-center gap-2 rounded-full bg-[#E2636B] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#E2636B]/30 transition-transform hover:scale-[1.03]"
                         >
                             Start Writing
                             <FaArrowRight className="h-3.5 w-3.5" />
                         </Link>
                         <Link
-                            href="/public-lessons"
+                            href="/lessons"
                             className="inline-flex items-center gap-2 rounded-full border border-[#E2636B]/40 px-6 py-3 text-sm font-semibold text-[#E2636B] transition-colors hover:bg-[#E2636B]/10"
                         >
                             Browse Lessons
