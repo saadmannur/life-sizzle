@@ -15,6 +15,7 @@ const LessonActions = ({ lessonId, user, initialLikesCount = 0, initiallyLiked =
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportReason, setReportReason] = useState(REPORT_REASONS[0]);
     const [toast, setToast] = useState(null);
+    const [doneReport, setDonReport] = useState(false)
 
     const router = useRouter()
 
@@ -99,10 +100,29 @@ const LessonActions = ({ lessonId, user, initialLikesCount = 0, initiallyLiked =
 
     };
 
-    const handleReportSubmit = () => {
-        // TODO: POST to lessonsReports { lessonId, reporterUserId/reportedUserEmail, reason, timestamp }
-        setShowReportModal(false);
-        showToast("Thanks — we'll review this lesson");
+    const handleReportSubmit = async () => {
+
+        try {
+
+            await serverMutation(
+                "/api/lesson-reports",
+                {
+                    lessonId,
+                    reason: reportReason
+                }
+            );
+
+            setShowReportModal(false);
+
+            showToast("Thanks! We'll review this lesson.");
+            setDonReport(true)
+
+        } catch (err) {
+
+            showToast("You already reported this lesson.");
+
+        }
+
     };
 
     const handleShare = async () => {
@@ -146,10 +166,12 @@ const LessonActions = ({ lessonId, user, initialLikesCount = 0, initiallyLiked =
 
             <button
                 onClick={() => (requireLogin() ? null : setShowReportModal(true))}
-                className="ml-auto flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-[#8A93A0] transition-colors hover:text-red-500"
+                className={`ml-auto flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-[#8A93A0] transition-colors hover:text-red-500 ${doneReport && 'text-red-500'}`}
             >
                 <PiFlagBold className="h-4 w-4" />
-                Report
+                {
+                    doneReport ? "Reported" : "Report"
+                }
             </button>
 
             {/* Report confirmation modal */}
