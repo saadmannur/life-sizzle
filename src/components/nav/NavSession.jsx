@@ -52,6 +52,10 @@ const NavSession = ({ variant = "desktop" }) => {
         user: '/dashboard/user',
         admin: '/dashboard/admin'
     }
+    const profileLinks = {
+        user: '/dashboard/user/profile',
+        admin: '/dashboard/admin/profile'
+    }
 
 
     if (variant === "mobile") {
@@ -87,8 +91,8 @@ const NavSession = ({ variant = "desktop" }) => {
 
                 {user && (
                     <>
-                        <NavLinks href="/dashboard/profile">Profile</NavLinks>
-                        <NavLinks href="/dashboard">Dashboard</NavLinks>
+                        <NavLinks href={profileLinks[user?.role || "user"]}>Profile</NavLinks>
+                        <NavLinks href={dashboardLinks[user?.role || "user"]}>Dashboard</NavLinks>
                     </>
                 )}
 
@@ -174,6 +178,7 @@ const NavSession = ({ variant = "desktop" }) => {
                                 <Dropdown.Item
                                     id="profile"
                                     textValue="Profile"
+                                    href={profileLinks[user?.role || "user"]}
                                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#26313B] transition-colors hover:bg-[#FBF6EC]"
                                 >
                                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E2636B]/10 text-[#E2636B]">

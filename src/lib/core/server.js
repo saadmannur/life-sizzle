@@ -52,7 +52,7 @@ export const serverDelete = async (path) => {
 
 
 //handle 401, 403 
-const handleStatusCode = (res) => {
+export const handleStatusCode = (res) => {
     // console.log('status code', res.status);
     if (res.status === 401) {
         redirect('/')
