@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { PiUsersThreeBold, PiShieldCheckBold, PiTrashBold, PiMagnifyingGlassBold, PiArrowsLeftRightBold } from "react-icons/pi";
 import { IoDiamond } from "react-icons/io5";
-import { updateUserRole } from "@/lib/api/usersForAdmin";
+import { deleteUser, updateUserRole } from "@/lib/api/usersForAdmin";
 
 const ROLE_STYLES = {
     admin: "bg-[#E2636B]/10 text-[#E2636B]",
@@ -30,6 +30,7 @@ const ManageUsersTable = ({ initialUsers }) => {
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [roleTarget, setRoleTarget] = useState(null);
     const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const filtered = useMemo(() => {
         return users.filter(Boolean).filter((u) => {
@@ -64,10 +65,26 @@ const ManageUsersTable = ({ initialUsers }) => {
         }
     };
 
-    const confirmDelete = () => {
-        // TODO: DELETE user account on the server (and their lessons, or reassign/orphan them)
-        setUsers((prev) => prev.filter((u) => u?.id !== deleteTarget?.id));
-        setDeleteTarget(null);
+    const confirmDelete = async () => {
+        setIsDeleting(true)
+        try {
+            const data = await deleteUser(deleteTarget._id);
+
+            if (data) {
+                setUsers(prev =>
+                    prev.filter(user => user._id !== deleteTarget._id)
+                );
+                router.refresh();
+                toast.success("User deleted");
+            }
+
+        } catch (err) {
+            console.error(err);
+            toast.error(err.message);
+        } finally {
+            setDeleteTarget(null);
+            setIsDeleting(false)
+        }
     };
 
     if (users.length === 0) {
@@ -196,10 +213,13 @@ const ManageUsersTable = ({ initialUsers }) => {
                                 Cancel
                             </button>
                             <button
+                                disabled={isDeleting}
                                 onClick={confirmDelete}
                                 className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white hover:opacity-90"
                             >
-                                Delete
+                                {
+                                    isDeleting? 'Removing...' : 'Remove'
+                                }
                             </button>
                         </div>
                     </div>

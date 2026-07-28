@@ -19,6 +19,16 @@ export const updateUserRole = async (userId, role) => {
     return data;
 }
 
+export const deleteUser = async (userId) => {
+    const data = await auth.api.removeUser({
+        body: {
+            userId,
+        },
+        headers: await headers(),
+    });
+    return data;
+};
+
 
 const baseurl = process.env.NEXT_PUBLIC_SERVER_URL;
 export const getAllUsersWithPagination = async (filters = {}) => {

@@ -14,7 +14,6 @@ const ManageUsersPage = async ({ searchParams }) => {
 
     // const result = await getAllUsers();
     const users = (result?.users || []).filter(Boolean);
-    console.log(users);
     const totalUsers = result?.totalUsers ?? users.length;
 
     return (
