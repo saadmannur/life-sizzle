@@ -278,7 +278,7 @@ const ManageLessonsTable = ({ initialLessons }) => {
                                             <button
                                                 onClick={() => toggleFeatured(lesson)}
                                                 title={lesson?.isFeatured ? "Remove from Featured" : "Mark as Featured"}
-                                                className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${lesson?.isFeatured ? "bg-amber-100 text-amber-500" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
+                                                className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors cursor-pointer ${lesson?.isFeatured ? "bg-amber-100 text-amber-500" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
                                                     }`}
                                             >
                                                 {lesson?.isFeatured ? <PiStarFill className="h-4 w-4" /> : <PiStarBold className="h-4 w-4" />}
@@ -289,7 +289,7 @@ const ManageLessonsTable = ({ initialLessons }) => {
                                             <button
                                                 onClick={() => toggleReviewed(lesson)}
                                                 title={lesson?.isReviewed ? "Mark as unreviewed" : "Mark as reviewed"}
-                                                className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${lesson?.isReviewed ? "bg-emerald-100 text-emerald-600" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
+                                                className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors cursor-pointer ${lesson?.isReviewed ? "bg-emerald-100 text-emerald-600" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
                                                     }`}
                                             >
                                                 {lesson?.isReviewed ? <PiCheckCircleFill className="h-4 w-4" /> : <PiCheckCircleBold className="h-4 w-4" />}
@@ -308,7 +308,7 @@ const ManageLessonsTable = ({ initialLessons }) => {
                                                 </Link>
                                                 <button
                                                     onClick={() => setDeleteTarget(lesson)}
-                                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 cursor-pointer"
                                                     title="Delete lesson"
                                                 >
                                                     <PiTrashBold className="h-3.5 w-3.5" />

@@ -13,6 +13,7 @@ import {
     PiXBold,
     PiCheckCircleBold,
 } from "react-icons/pi";
+import { serverDelete } from "@/lib/core/server";
 
 const formatDate = (value) => {
     const raw = value?.$date || value;
@@ -36,36 +37,49 @@ const ReportedLessonsTable = ({ initialReports }) => {
     };
 
     const confirmDeleteLesson = async () => {
-        const id = getRowId(deleteTarget);
         setIsSubmitting(true);
+
         try {
-            // TODO: DELETE the lesson on the server (and its report records)
-            removeRow(id);
-            router.refresh();
-            toast.success("Lesson deleted");
+            const lessonId = getRowId(deleteTarget);
+
+            const res = await serverDelete(`/api/admin/lessons/${lessonId}`);
+
+            if (res.success) {
+                toast.success(res.message);
+
+                removeRow(lessonId);
+                setDeleteTarget(null);
+            }
         } catch (err) {
             console.error(err);
-            toast.error(err?.message || "Something went wrong. Please try again.");
+            toast.error("Failed to delete lesson");
         } finally {
             setIsSubmitting(false);
-            setDeleteTarget(null);
         }
     };
 
     const confirmIgnore = async () => {
-        const id = getRowId(ignoreTarget);
+        const lessonId = getRowId(ignoreTarget);
+
         setIsSubmitting(true);
+
         try {
-            // TODO: PATCH all reports for this lesson to status "resolved"/"ignored" on the server
-            removeRow(id);
-            router.refresh();
-            toast.success("Reports cleared, lesson stays live");
+            const res = await serverDelete(
+                `/api/admin/reported-lessons/${lessonId}`
+            );
+
+            if (res.success) {
+                toast.success(res.message);
+
+                removeRow(lessonId);
+
+                setIgnoreTarget(null);
+            }
         } catch (err) {
             console.error(err);
-            toast.error(err?.message || "Something went wrong. Please try again.");
+            toast.error("Failed to clear reports");
         } finally {
             setIsSubmitting(false);
-            setIgnoreTarget(null);
         }
     };
 
@@ -141,14 +155,14 @@ const ReportedLessonsTable = ({ initialReports }) => {
                                             )}
                                             <button
                                                 onClick={() => setIgnoreTarget(row)}
-                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 cursor-pointer"
                                                 title="Ignore — keep lesson live and clear reports"
                                             >
                                                 <PiCheckCircleBold className="h-3.5 w-3.5" />
                                             </button>
                                             <button
                                                 onClick={() => setDeleteTarget(row)}
-                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100"
+                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 cursor-pointer"
                                                 title="Delete lesson"
                                             >
                                                 <PiTrashBold className="h-3.5 w-3.5" />
@@ -222,7 +236,7 @@ const ReportedLessonsTable = ({ initialReports }) => {
                                 disabled={isSubmitting}
                                 className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {isSubmitting ? "Deleting..." : "Delete"}
+                                {isSubmitting ? "Removing..." : "Delete"}
                             </button>
                         </div>
                     </div>

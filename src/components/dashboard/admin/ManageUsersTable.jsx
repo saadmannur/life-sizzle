@@ -176,14 +176,14 @@ const ManageUsersTable = ({ initialUsers }) => {
                                         <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => setRoleTarget(u)}
-                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1] hover:bg-[#6366F1]/20"
+                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1] hover:bg-[#6366F1]/20 cursor-pointer"
                                                 title={u?.role === "admin" ? "Demote to user" : "Promote to admin"}
                                             >
                                                 <PiArrowsLeftRightBold className="h-3.5 w-3.5" />
                                             </button>
                                             <button
                                                 onClick={() => setDeleteTarget(u)}
-                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100"
+                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 cursor-pointer"
                                                 title="Delete account"
                                             >
                                                 <PiTrashBold className="h-3.5 w-3.5" />
