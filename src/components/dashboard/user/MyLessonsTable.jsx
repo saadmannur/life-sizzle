@@ -16,6 +16,7 @@ const formatDate = (value) => {
 const MyLessonsTable = ({ initialLessons, isPremiumUser }) => {
     const [lessons, setLessons] = useState(initialLessons);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false)
 
     const toggleVisibility = (id) => {
         // TODO: PATCH lesson.visibility on the server
@@ -31,11 +32,12 @@ const MyLessonsTable = ({ initialLessons, isPremiumUser }) => {
     };
 
     const confirmDelete = async () => {
+        setIsDeleting(true)
 
         try {
 
             const deleteLesson = await serverDelete(`/api/lessons/${deleteTarget._id}`);
-            console.log(deleteLesson);
+            // console.log(deleteLesson);
 
             if (deleteLesson.success) {
                 toast.success(deleteLesson.message)
@@ -51,6 +53,8 @@ const MyLessonsTable = ({ initialLessons, isPremiumUser }) => {
 
             console.log(err);
 
+        }finally{
+            setIsDeleting(false)
         }
 
     };
@@ -60,7 +64,7 @@ const MyLessonsTable = ({ initialLessons, isPremiumUser }) => {
             <div className="rounded-2xl border border-dashed border-[#26313B]/15 bg-white py-16 text-center">
                 <PiBookOpenTextBold className="mx-auto mb-3 h-8 w-8 text-[#26313B]/20" />
                 <p className="mb-4 text-sm font-medium text-[#8A93A0]">You haven&apos;t written any lessons yet.</p>
-                <Link href="/dashboard/add-lesson" className="rounded-full bg-[#E2636B] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90">
+                <Link href="/dashboard/user/new" className="rounded-full bg-[#E2636B] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90">
                     Write your first lesson
                 </Link>
             </div>
@@ -188,10 +192,13 @@ const MyLessonsTable = ({ initialLessons, isPremiumUser }) => {
                                 Cancel
                             </button>
                             <button
+                                disabled={isDeleting}
                                 onClick={confirmDelete}
                                 className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white hover:opacity-90"
                             >
-                                Delete
+                                {
+                                    isDeleting ? 'Removing...' : 'Delete'
+                                }
                             </button>
                         </div>
                     </div>

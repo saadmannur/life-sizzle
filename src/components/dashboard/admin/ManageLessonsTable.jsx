@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,6 +14,8 @@ import {
     PiLockSimpleBold,
     PiGlobeBold,
 } from "react-icons/pi";
+import { serverDelete, serverMutation } from "@/lib/core/server";
+import { toast } from "sonner";
 
 const formatDate = (value) => {
     const raw = value?.$date || value;
@@ -21,48 +23,129 @@ const formatDate = (value) => {
     return new Date(raw).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 };
 
+const getLessonId = (lesson) => lesson?.id ?? lesson?._id;
+
 const ManageLessonsTable = ({ initialLessons }) => {
-    const [lessons, setLessons] = useState(initialLessons);
+    const [lessons, setLessons] = useState(() => (Array.isArray(initialLessons) ? initialLessons.filter(Boolean) : []));
+    useEffect(() => {
+        setLessons(Array.isArray(initialLessons) ? initialLessons.filter(Boolean) : []);
+    }, [initialLessons]);
+
     const [category, setCategory] = useState("all");
     const [visibility, setVisibility] = useState("all");
     const [flaggedOnly, setFlaggedOnly] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false)
 
     const categories = useMemo(
-        () => ["all", ...new Set(lessons.map((l) => l.category).filter(Boolean))],
+        () => ["all", ...new Set(lessons.map((l) => l?.category).filter(Boolean))],
         [lessons]
     );
 
     const stats = useMemo(
         () => ({
-            public: lessons.filter((l) => l.visibility === "public").length,
-            private: lessons.filter((l) => l.visibility === "private").length,
-            flagged: lessons.filter((l) => l.flagsCount > 0).length,
+            public: lessons.filter((l) => l?.visibility === "public").length,
+            private: lessons.filter((l) => l?.visibility === "private").length,
+            flagged: lessons.filter((l) => l?.flagsCount > 0).length,
         }),
         [lessons]
     );
 
     const filtered = lessons.filter(
         (l) =>
-            (category === "all" || l.category === category) &&
-            (visibility === "all" || l.visibility === visibility) &&
-            (!flaggedOnly || l.flagsCount > 0)
+            l &&
+            (category === "all" || l?.category === category) &&
+            (visibility === "all" || l?.visibility === visibility) &&
+            (!flaggedOnly || l?.flagsCount > 0)
     );
 
-    const toggleFeatured = (id) => {
-        // TODO: PATCH lesson.isFeatured on the server
-        setLessons((prev) => prev.map((l) => (l._id === id ? { ...l, isFeatured: !l.isFeatured } : l)));
+    const toggleFeatured = async (lesson) => {
+        try {
+            const res = await serverMutation(
+                `/api/admin/lessons/${lesson._id}/featured`,
+                {
+                    isFeatured: !lesson.isFeatured,
+                },
+                "PATCH"
+            );
+
+            if (res.success) {
+                toast.success(`${lesson.isFeatured ? 'Removed' : 'Featured'}`);
+
+                setLessons((prev) =>
+                    prev.map((item) =>
+                        item._id === lesson._id
+                            ? {
+                                ...item,
+                                isFeatured: !item.isFeatured,
+                            }
+                            : item
+                    )
+                );
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to update featured status");
+        }
     };
 
-    const toggleReviewed = (id) => {
-        // TODO: PATCH lesson.isReviewed on the server
-        setLessons((prev) => prev.map((l) => (l._id === id ? { ...l, isReviewed: !l.isReviewed } : l)));
+    const toggleReviewed = async (lesson) => {
+        try {
+            const res = await serverMutation(
+                `/api/admin/lessons/${lesson._id}/reviewed`,
+                {
+                    isReviewed: !lesson.isReviewed,
+                },
+                "PATCH"
+            );
+
+            if (res.success) {
+                toast.success(`${lesson.isReviewed ? 'Removed' : 'Reviewed'}`);
+
+                setLessons((prev) =>
+                    prev.map((item) =>
+                        item._id === lesson._id
+                            ? {
+                                ...item,
+                                isReviewed: !item.isReviewed,
+                            }
+                            : item
+                    )
+                );
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to update review status");
+        }
     };
 
-    const confirmDelete = () => {
-        // TODO: DELETE lesson on the server
-        setLessons((prev) => prev.filter((l) => l._id !== deleteTarget._id));
-        setDeleteTarget(null);
+    const confirmDelete = async () => {
+        setIsDeleting(true)
+
+        try {
+
+            const deleteLesson = await serverDelete(`/api/admin/lessons/${deleteTarget._id}`);
+            console.log(deleteLesson);
+
+            if (deleteLesson.success) {
+                toast.success(deleteLesson.message)
+            }
+
+            setLessons(prev =>
+                prev.filter(lesson => lesson._id !== deleteTarget._id)
+            );
+
+            setDeleteTarget(null);
+
+        } catch (err) {
+
+            console.log(err);
+
+        }
+        finally {
+            setIsDeleting(false)
+        }
+
     };
 
     const statCards = [
@@ -118,8 +201,8 @@ const ManageLessonsTable = ({ initialLessons }) => {
                 <button
                     onClick={() => setFlaggedOnly((v) => !v)}
                     className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${flaggedOnly
-                            ? "border-red-200 bg-red-50 text-red-500"
-                            : "border-[#26313B]/10 bg-white text-[#26313B] hover:bg-[#FBF6EC]"
+                        ? "border-red-200 bg-red-50 text-red-500"
+                        : "border-[#26313B]/10 bg-white text-[#26313B] hover:bg-[#FBF6EC]"
                         }`}
                 >
                     <PiFlagFill className="h-3.5 w-3.5" /> Flagged Only
@@ -146,92 +229,95 @@ const ManageLessonsTable = ({ initialLessons }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#26313B]/8">
-                            {filtered.map((lesson) => (
-                                <tr key={lesson._id} className="align-middle">
-                                    <td className="px-5 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[#FBF6EC]">
-                                                {lesson.imageUrl ? (
-                                                    <Image src={lesson.imageUrl} alt={lesson.headline} fill className="object-cover" />
-                                                ) : (
-                                                    <div className="flex h-full w-full items-center justify-center">
-                                                        <PiBookOpenTextBold className="h-4 w-4 text-[#26313B]/20" />
-                                                    </div>
-                                                )}
+                            {filtered.map((lesson, i) => {
+                                const lessonId = getLessonId(lesson);
+                                return (
+                                    <tr key={lessonId ?? i} className="align-middle">
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[#FBF6EC]">
+                                                    {lesson?.imageUrl ? (
+                                                        <Image src={lesson.imageUrl} alt={lesson?.headline || "Lesson"} fill className="object-cover" />
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center">
+                                                            <PiBookOpenTextBold className="h-4 w-4 text-[#26313B]/20" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="max-w-[200px] truncate font-semibold text-[#26313B]">{lesson?.headline}</p>
+                                                    <p className="text-xs text-[#8A93A0]">{lesson?.category}</p>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="max-w-[200px] truncate font-semibold text-[#26313B]">{lesson.headline}</p>
-                                                <p className="text-xs text-[#8A93A0]">{lesson.category}</p>
-                                            </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td className="px-5 py-4 text-[#6B7684]">{lesson.authorName || "Unknown"}</td>
+                                        <td className="px-5 py-4 text-[#6B7684]">{lesson?.userName || "Unknown"}</td>
 
-                                    <td className="px-5 py-4">
-                                        <span
-                                            className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${lesson.visibility === "public"
+                                        <td className="px-5 py-4">
+                                            <span
+                                                className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${lesson?.visibility === "public"
                                                     ? "bg-[#6366F1]/10 text-[#6366F1]"
                                                     : "bg-[#26313B]/8 text-[#26313B]"
-                                                }`}
-                                        >
-                                            {lesson.visibility}
-                                        </span>
-                                    </td>
-
-                                    <td className="px-5 py-4">
-                                        {lesson.flagsCount > 0 ? (
-                                            <span className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-500">
-                                                <PiFlagFill className="h-3 w-3" /> {lesson.flagsCount}
+                                                    }`}
+                                            >
+                                                {lesson?.visibility}
                                             </span>
-                                        ) : (
-                                            <span className="text-xs text-[#8A93A0]">—</span>
-                                        )}
-                                    </td>
+                                        </td>
 
-                                    <td className="px-5 py-4">
-                                        <button
-                                            onClick={() => toggleFeatured(lesson._id)}
-                                            title={lesson.isFeatured ? "Remove from Featured" : "Mark as Featured"}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${lesson.isFeatured ? "bg-amber-100 text-amber-500" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
-                                                }`}
-                                        >
-                                            {lesson.isFeatured ? <PiStarFill className="h-4 w-4" /> : <PiStarBold className="h-4 w-4" />}
-                                        </button>
-                                    </td>
+                                        <td className="px-5 py-4">
+                                            {lesson?.flagsCount > 0 ? (
+                                                <span className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-500">
+                                                    <PiFlagFill className="h-3 w-3" /> {lesson.flagsCount}
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-[#8A93A0]">—</span>
+                                            )}
+                                        </td>
 
-                                    <td className="px-5 py-4">
-                                        <button
-                                            onClick={() => toggleReviewed(lesson._id)}
-                                            title={lesson.isReviewed ? "Mark as unreviewed" : "Mark as reviewed"}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${lesson.isReviewed ? "bg-emerald-100 text-emerald-600" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
-                                                }`}
-                                        >
-                                            {lesson.isReviewed ? <PiCheckCircleFill className="h-4 w-4" /> : <PiCheckCircleBold className="h-4 w-4" />}
-                                        </button>
-                                    </td>
-
-                                    <td className="px-5 py-4 text-[#6B7684]">{formatDate(lesson.createAt)}</td>
-
-                                    <td className="px-5 py-4">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Link
-                                                href={`/public-lessons/${lesson._id}`}
-                                                className="rounded-full border border-[#26313B]/10 px-3 py-1.5 text-xs font-semibold text-[#26313B] hover:bg-[#FBF6EC]"
-                                            >
-                                                View
-                                            </Link>
+                                        <td className="px-5 py-4">
                                             <button
-                                                onClick={() => setDeleteTarget(lesson)}
-                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100"
-                                                title="Delete lesson"
+                                                onClick={() => toggleFeatured(lesson)}
+                                                title={lesson?.isFeatured ? "Remove from Featured" : "Mark as Featured"}
+                                                className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${lesson?.isFeatured ? "bg-amber-100 text-amber-500" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
+                                                    }`}
                                             >
-                                                <PiTrashBold className="h-3.5 w-3.5" />
+                                                {lesson?.isFeatured ? <PiStarFill className="h-4 w-4" /> : <PiStarBold className="h-4 w-4" />}
                                             </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+
+                                        <td className="px-5 py-4">
+                                            <button
+                                                onClick={() => toggleReviewed(lesson)}
+                                                title={lesson?.isReviewed ? "Mark as unreviewed" : "Mark as reviewed"}
+                                                className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${lesson?.isReviewed ? "bg-emerald-100 text-emerald-600" : "bg-[#26313B]/8 text-[#26313B]/40 hover:text-[#26313B]"
+                                                    }`}
+                                            >
+                                                {lesson?.isReviewed ? <PiCheckCircleFill className="h-4 w-4" /> : <PiCheckCircleBold className="h-4 w-4" />}
+                                            </button>
+                                        </td>
+
+                                        <td className="px-5 py-4 text-[#6B7684]">{formatDate(lesson?.createAt)}</td>
+
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={`/lessons/${lessonId}`}
+                                                    className="rounded-full border border-[#26313B]/10 px-3 py-1.5 text-xs font-semibold text-[#26313B] hover:bg-[#FBF6EC]"
+                                                >
+                                                    View
+                                                </Link>
+                                                <button
+                                                    onClick={() => setDeleteTarget(lesson)}
+                                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100"
+                                                    title="Delete lesson"
+                                                >
+                                                    <PiTrashBold className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -243,7 +329,7 @@ const ManageLessonsTable = ({ initialLessons }) => {
                     <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
                         <h3 className="mb-1 text-lg font-bold text-[#26313B]">Delete this lesson?</h3>
                         <p className="mb-5 text-sm text-[#8A93A0]">
-                            &quot;{deleteTarget.headline}&quot; will be permanently removed. This can&apos;t be undone.
+                            &quot;{deleteTarget?.headline}&quot; will be permanently removed. This can&apos;t be undone.
                         </p>
                         <div className="flex gap-3">
                             <button
@@ -253,10 +339,13 @@ const ManageLessonsTable = ({ initialLessons }) => {
                                 Cancel
                             </button>
                             <button
+                                disabled={isDeleting}
                                 onClick={confirmDelete}
                                 className="flex-1 rounded-full bg-red-500 py-2.5 text-sm font-semibold text-white hover:opacity-90"
                             >
-                                Delete
+                                {
+                                    isDeleting ? 'Removing...' : 'Delete'
+                                }
                             </button>
                         </div>
                     </div>
