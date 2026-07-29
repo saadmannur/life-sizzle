@@ -1,5 +1,6 @@
 import { getLessons } from "@/lib/api/lesson";
 import LessonCard from "@/components/lessons/LessonCard";
+import FeaturedMotionGrid from "@/components/home/FeaturedMotionGrid";
 import { PiStarBold } from "react-icons/pi";
 
 const getSortDate = (lesson) => {
@@ -30,11 +31,11 @@ const FeaturedLessons = async () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <FeaturedMotionGrid>
                     {featured.map((lesson) => (
                         <LessonCard key={lesson._id} lesson={lesson} />
                     ))}
-                </div>
+                </FeaturedMotionGrid>
             </div>
         </section>
     );

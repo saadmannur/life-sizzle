@@ -17,7 +17,7 @@ export const getLessons = async (filters = {}) => {
     });
 
     if (!res.ok) {
-        throw new Error('Failed to fetch jobs');
+        throw new Error('Failed to fetch lessons');
     }
 
     return res.json();
