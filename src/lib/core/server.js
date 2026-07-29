@@ -55,10 +55,10 @@ export const serverDelete = async (path) => {
 export const handleStatusCode = (res) => {
     // console.log('status code', res.status);
     if (res.status === 401) {
-        redirect('/')
+        redirect('/unauthorized')
     }
     if (res.status === 403) {
-        redirect('/')
+        redirect('/unauthorized/forbidden')
     }
 
     return res.json()
